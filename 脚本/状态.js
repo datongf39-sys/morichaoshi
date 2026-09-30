@@ -38,6 +38,9 @@ SG.State = (function () {
       points: profile.goldenFinger === 'pdd' ? (DATA.golden.pddStartPoints || 1000) : 0,
       cumPoints: 0,
       crystals: {},                        // 收取的晶核（按阶）
+      totalBuys: 0,                        // 累计顾客购买笔数（解锁非必需品销售门槛）
+      hotelDays: 0,                        // 酒店运营天数（与 totalBuys 取较松者作为门槛）
+      reputation: 50,                      // 名声 0~100（初始 50，成交加、拒客扣，影响客流）
       nutr: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 },
       nutrDays: [],
       malnutrition: false,
@@ -104,6 +107,9 @@ SG.State = (function () {
     if (s.gf.exploreCount == null) s.gf.exploreCount = 0;
     if (s.gf.cookCount == null) s.gf.cookCount = 0;
     if (s.gf.hazardCount == null) s.gf.hazardCount = 0;
+    if (s.totalBuys == null) s.totalBuys = 0;
+    if (s.hotelDays == null) s.hotelDays = 0;
+    if (s.reputation == null) s.reputation = 50;
     /* 设施系统：旧档无设施 → 按当前等级初始化，旧平铺货架收回仓库重新上货 */
     if (!s.store.facilities) SG.Fac.ensure(s);
     /* 旧搬迁位置（固定选址）失效，回到荒野 */

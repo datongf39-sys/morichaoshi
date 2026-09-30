@@ -49,7 +49,7 @@ const sandbox = {
 vm.createContext(sandbox);
 
 /* 按 HTML 顺序加载脚本 */
-const html = fs.readFileSync(path.join(ROOT, '末日超市.html'), 'utf8');
+const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const scripts = [];
 const re = /<script src="([^"]+)"><\/script>/g;
 let m;

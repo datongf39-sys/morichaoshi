@@ -106,14 +106,14 @@ SG.Screens.main = function (body, state) {
   if (!menu.length) {
     h += '<div class="muted">系统正在采购，稍后再来。</div>';
   } else {
-    menu.forEach(function (o) {
-      var dish = SG.Data.dish(o.dishId);
+    menu.forEach(function (dishId) {
+      var dish = SG.Data.dish(dishId);
       if (!dish) return;
       var cooked = (state.cooked && state.cooked[dish.id]) || 0;
       var canOwn = cooked > 0;
       h += '<div class="order-row"><div><b>' + dish.name + '</b> <span class="chip">' + dish.cuisine + '</span>' +
         '<div class="small muted">饱食+' + (dish.eff.sat || 55) + ' · 碳水' + (dish.nut.carb || 0) + 'g/蛋白' + (dish.nut.prot || 0) + 'g/脂肪' + (dish.nut.fat || 0) + 'g/维' + (dish.nut.vit || 0) + 'g</div></div>' +
-        '<div style="text-align:right"><div class="small">' + SG.u.money(o.price) + ' 积分</div>' +
+        '<div style="text-align:right"><div class="small">' + SG.u.money(dish.price) + ' 积分</div>' +
         (canOwn ? SG.UI.btn('吃自做的（库存' + cooked + '）', 'UI.eatCookedDish', [dish.id], 'sm') : '') +
         SG.UI.btn('兑换并享用', 'UI.orderDish', [dish.id], 'sm primary') + '</div></div>';
     });

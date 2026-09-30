@@ -50,19 +50,31 @@ SG.Econ = (function () {
     var amount = SG.u.rint(10, 120);
     return { type: 'cash', label: '现金 ¥' + amount, value: Math.round(amount * cashRate(month) * 100) / 100 };
   }
+  /* 顾客拿来换积分的"旧物"池：只收非生活必需品（末日前家里的闲置），
+     绝不出现食物/水/药品/米面粮油等必需品——顾客自己也要活命。
+     这些东西顾客直接折算成积分，实物不进玩家仓库。 */
+  function exchangePool(state) {
+    if (!SG.Econ._exPool) {
+      var nonEss = ['cloth', 'ent', 'book', 'stationery', 'kitchen', 'tool', 'coffee', 'tea', 'candy', 'bakery'];
+      SG.Econ._exPool = SG.Data.products.filter(function (p) {
+        return nonEss.indexOf(p.kind) >= 0 && p.price >= 20;
+      });
+    }
+    return SG.Econ._exPool;
+  }
   function makeGoods(month) {
-    var pool = SG.Data.products.filter(function (p) {
-      return p.kind === 'grain' || p.kind === 'instant' || p.kind === 'snack' || p.kind === 'water' || p.kind === 'drink' || p.kind === 'daily';
-    });
-    var n = SG.u.rint(1, 3), items = [], val = 0;
+    var pool = exchangePool();
+    var n = SG.u.rint(1, 2), items = [], val = 0;
     for (var i = 0; i < n; i++) {
       var p = SG.u.pick(pool);
-      var q = SG.u.rint(1, 4);
-      items.push({ name: SG.Data.label(p), qty: q });
+      /* 旧物折价：1~2 件，高价物品通常只带 1 件 */
+      var q = p.price >= 200 ? SG.u.rint(1, 1) : SG.u.rint(1, 2);
+      items.push({ name: '旧' + SG.Data.label(p), qty: q, pid: p.id });
       val += p.price * q;
     }
     val = Math.round(val * goodsRate(month) * 100) / 100;
-    return { type: 'goods', label: '旧物资×' + n, items: items, value: val };
+    var head = n === 1 ? '闲置旧物' : '一批旧物';
+    return { type: 'goods', label: head + '：' + items.map(function (x) { return x.name + '×' + x.qty; }).join('、'), items: items, value: val };
   }
   function makeHard() {
     var keys = Object.keys(cfg().HARD_GOODS);

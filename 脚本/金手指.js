@@ -8,25 +8,30 @@ SG.Gf = (function () {
   var cfg = function () { return DATA.config; };
   var g = function () { return DATA.golden; };
 
-  /* 拼夕夕品类池（加权：水/速食等必需品更容易出现；蔬果肉等高级生鲜低概率） */
-  function pddPoolWeighted() {
+  /* 拼夕夕品类池（加权：当前等级可陈列的必需品最容易出现；
+     不可陈列的商品（低等级药品/生鲜/衣物/枪械）权重压到极低，
+     避免今日品类里一大半买了也摆不上货架） */
+  function pddPoolWeighted(state) {
     var arr = [];
     DATA.products.forEach(function (p) {
       var w = 1;
       if (p.kind === 'water') w = 5;
       else if (p.kind === 'instant') w = 3;
-      else if (p.kind === 'drink' || p.kind === 'snack' || p.kind === 'grain' || p.kind === 'daily') w = 2;
-      else if (p.kind === 'med') w = 1.5;
-      /* 蔬果肉类等高级生鲜（小卖部/便利店不卖）：金手指低概率流出，获得后仅能自用 */
-      if (p.kind === 'veg' || p.kind === 'fruit' || p.kind === 'meat' || p.kind === 'aquatic') w = 0.15;
-      for (var i = 0; i < w; i++) arr.push(p.id);
+      else if (p.kind === 'drink' || p.kind === 'snack' || p.kind === 'grain' || p.kind === 'daily' || p.kind === 'hygiene' || p.kind === 'paper') w = 2;
+      else if (p.kind === 'spice' || p.kind === 'candy' || p.kind === 'coffee' || p.kind === 'tea' || p.kind === 'bakery') w = 1.5;
+      else if (p.kind === 'med') w = 1.2;
+      /* 高级生鲜（蔬果肉蛋水产）：金手指低概率流出 */
+      if (p.kind === 'veg' || p.kind === 'fruit' || p.kind === 'meat' || p.kind === 'aquatic' || p.kind === 'dairy') w = 0.15;
+      /* 当前等级不能陈列的商品：低权重偶尔出现（自用/员工福利），但不至于一大半都是 */
+      if (state && !SG.Data.canStock(p, state)) w = 0.3;
+      for (var i = 0; i < w * 20; i++) arr.push(p.id);
     });
     return arr;
   }
   function refresh(state) {
     if (state.gf.pddDay !== state.day) {
       var n = SG.u.rint(g().pddDaily[0], g().pddDaily[1]);
-      var pool = pddPoolWeighted();
+      var pool = pddPoolWeighted(state);
       var picked = [];
       for (var i = 0; i < n; i++) picked.push(SG.u.pick(pool));
       var items = SG.u.uniq(picked);

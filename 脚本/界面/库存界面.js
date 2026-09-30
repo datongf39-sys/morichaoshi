@@ -16,7 +16,8 @@ SG.Screens.inv = function (body, state) {
     '<span class="val">' + SG.u.money(used) + '/' + cap + '</span></div>';
   var expiredCount = SG.Inv.stockedList(state).filter(function (x) { return x.expired; }).length;
   h += '<div class="mt" style="display:flex;gap:8px;flex-wrap:wrap">' +
-    SG.UI.btn('一键补货（今日品类各补至多 10 件）', 'UI.oneClickRestock', [], 'primary') +
+    SG.UI.btn('一键补货（今日品类按预算扫货）', 'UI.oneClickRestock', [], 'primary') +
+    SG.UI.btn('一键上货（仓库→货架）', 'UI.autoShelfUp', [], 'primary') +
     (expiredCount ? SG.UI.btn('清理过期商品（' + expiredCount + ' 种）', 'UI.cleanExpired', [], 'warn') : '') +
     '</div>';
   h += '<div class="small muted mt">进货渠道：拼夕夕系统（进货价 = 售价 2 折）与变废为宝探索。补完货记得「上货」——把商品摆进货架/冷藏柜等设施，顾客才会买。</div></div>';
@@ -75,21 +76,24 @@ SG.Screens.inv = function (body, state) {
   });
   h += '</div></div>';
 
-  /* 拼夕夕今日品类 */
+  /* 拼夕夕今日品类（购买渠道：只进货到仓库，上货请去下方店内设施区操作） */
   var pdd = SG.Gf.pddItems(state);
-  h += '<div class="panel"><h3>拼夕夕今日品类（' + pdd.length + ' 种 · 进货价 = 售价 2 折）</h3><div class="pdd-grid">';
+  h += '<div class="panel"><h3>拼夕夕今日品类（' + pdd.length + ' 种 · 进货价 = 售价 2 折）</h3>';
+  h += '<div class="small muted mb">拼夕夕只负责下单送货，买完进仓库；上架请到下方「店内设施」选对应设施点「上货」。</div>';
+  h += '<div class="pdd-grid">';
   pdd.forEach(function (p) {
     var inStock = (state.inventory[p.id] || 0) > 0;
     var onShelf = (state.shelf[p.id] || 0) > 0;
     var canSell = SG.Data.canStock(p, state);
     h += '<div class="pdd-chip"><div><b>' + SG.Data.label(p) + '</b> <span class="chip">' + p.cat + '</span>' +
-      (onShelf ? ' <span class="chip ok">已上货</span>' : (inStock ? ' <span class="chip">有货</span>' : '')) + '</div>' +
+      (onShelf ? ' <span class="chip ok">已上货</span>' : (inStock ? ' <span class="chip">仓库有货</span>' : '')) + '</div>' +
       '<div class="small muted">售价 ' + SG.u.money(p.price) + ' · 进货 ' + SG.u.money(Math.round(p.price * DATA.golden.pddRate * 100) / 100) + '</div>' +
       (p.stor ? '<div class="small muted">需存放：' + DATA.facility.TYPES[p.stor].name + '</div>' : '') +
       (!canSell ? '<div class="small warn">当前等级不可陈列，仅可自用/员工使用</div>' : '') +
       '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
-      SG.UI.btn('补 10 件', 'UI.restockItem', [p.id, 10], 'sm') +
-      ((state.inventory[p.id] || 0) > 0 ? SG.UI.btn('上货', 'UI.shelfUpAny', [p.id], 'sm primary') : '') +
+      SG.UI.btn('补 20', 'UI.restockItem', [p.id, 20], 'sm') +
+      SG.UI.btn('补 50', 'UI.restockItem', [p.id, 50], 'sm') +
+      SG.UI.btn('补 100', 'UI.restockItem', [p.id, 100], 'sm primary') +
       '</div></div>';
   });
   h += '</div></div>';
@@ -120,7 +124,7 @@ SG.Screens.inv = function (body, state) {
       '</div></div>';
     if (!x.expired) {
       h += '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
-        (inPdd ? SG.UI.btn('补 10 件', 'UI.restockItem', [p.id, 10], 'sm') : '') +
+        (inPdd ? SG.UI.btn('补 20', 'UI.restockItem', [p.id, 20], 'sm') + SG.UI.btn('补 50', 'UI.restockItem', [p.id, 50], 'sm') : '') +
         SG.UI.btn('上货', 'UI.shelfUpAny', [p.id], 'sm primary') +
         SG.UI.btn('下架', 'UI.shelfDownAny', [p.id], 'sm') + '</div>';
     }
@@ -147,6 +151,24 @@ SG.A.cleanExpired = function () {
   SG.Player.log(state, '清理了过期商品，共 ' + n + ' 件。');
   SG.State.save();
   return { ok: true, msg: '清理完成，共 ' + n + ' 件过期商品。' };
+};
+SG.A.autoShelfUp = function () {
+  var state = SG.State.getState();
+  var r = SG.Fac.autoShelfUp(state);
+  if (!r.placedCount) {
+    var hint = r.skipped.length ? '：' + r.skipped.slice(0, 3).map(function (s) {
+      return SG.Data.label(SG.Data.product(s.pid)) + '（' + s.reason + '）';
+    }).join('、') : '仓库里没有能上架的商品';
+    return { ok: false, msg: '没有可上架的商品' + hint };
+  }
+  SG.Player.log(state, '一键上货：' + r.kinds + ' 种商品共 ' + r.placedCount + ' 件摆上货架。');
+  if (r.skipped.length) {
+    SG.Player.log(state, '以下商品未能上架：' + r.skipped.slice(0, 5).map(function (s) {
+      return SG.Data.label(SG.Data.product(s.pid)) + '×' + Math.round(s.qty) + '（' + s.reason + '）';
+    }).join('、'), 'warn');
+  }
+  SG.State.save();
+  return { ok: true, msg: '一键上货完成：' + r.kinds + ' 种 ' + r.placedCount + ' 件' + (r.skipped.length ? '（' + r.skipped.length + ' 种未上架，见日志）' : ''), minutes: Math.min(20, r.kinds * 2) };
 };
 SG.A.shelfUp = function (pid, qty, facId) {
   var state = SG.State.getState();

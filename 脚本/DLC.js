@@ -96,6 +96,7 @@ SG.Dlc = (function () {
   function hotelDaily(state) {
     var def = hotelDef(state);
     if (!def) return;
+    state.hotelDays = (state.hotelDays || 0) + 1;
     var income = def.income;
     if (SG.Player.waterCount(state) < 6) {
       income = Math.floor(income * 0.5);

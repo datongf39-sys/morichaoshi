@@ -52,6 +52,9 @@ SG.Cust = (function () {
     if (state.store.dlc.shops.comshop) shopBonus += 2;
     if (state.store.dlc.shops.carshop) shopBonus += 3;
     var base = 4 + state.store.level * 2 + state.store.shieldLv * 2 + areaSum + shopBonus + empBonus;
+    /* 名声修正：名声 50 = 1.0，0 = 0.4，100 = 1.6（荒野小店靠口碑拉客） */
+    var rep = (state.reputation == null ? 50 : state.reputation);
+    base *= (0.4 + rep / 100 * 1.2);
     /* 基地人数修正：人多的基地客流更多 */
     if (state.bases && state.store.location) {
       var b = SG.Map.base(state);
@@ -62,16 +65,20 @@ SG.Cust = (function () {
         SG.Time.hazardDef(state).id === 'horde' && !SG.Time.hazardProtected(state)) {
       base *= 0.5;
     }
-    return Math.max(3, Math.floor(base));
+    return Math.max(2, Math.floor(base));
   }
 
   /* 每小时到店一批：顾客进入店内队列，等待接待（不立即交易） */
   function hourlyWave(state) {
+    /* 货架上没有任何可售商品 → 不会有顾客上门（货架就是招牌） */
+    if (!SG.Inv.availableOnShelf(state).length) return;
     var cap = capacityOf(state);
     var lvl = state.store.level, emp = state.employees.length, sh = state.store.shieldLv;
     var areaSum = 0;
     for (var k in state.store.areas) areaSum += (cfg().AREAS[k] || {}).cap || 0;
-    var n = Math.floor(SG.u.rint(2, 4) + lvl + emp + sh * 0.5 + areaSum * 0.35);
+    var n = Math.floor(SG.u.rint(1, 2) + lvl * 0.8 + emp + sh * 0.5 + areaSum * 0.35);
+    /* 荒野落脚（未搬到基地旁）：人迹罕至，客流再砍半 */
+    if (!state.store.location) n = Math.floor(n * 0.5);
     var room = cap - state.visitors.length;
     n = Math.min(n, room, cap);
     if (n <= 0) return;
@@ -181,14 +188,16 @@ SG.Cust = (function () {
     if (SG.u.chance(theftChance(c, state))) out.theft = handleTheft(c, state);
     if (SG.u.chance(robberyChance(c, state))) out.robbery = handleRobbery(c, state);
     if (out.theft || out.robbery) out.events.push(out.theft || out.robbery);
-    /* 2. 店主选择：拒绝售卖 → 顾客离开 */
+    /* 2. 店主选择：拒绝售卖 → 顾客离开，扣名声 */
     if (!accept) {
       out.refused = true;
       out.hist.push('店主拒绝了接待，' + c.name + '悻悻离开');
+      /* 拒客扣名声 */
+      state.reputation = Math.max(0, (state.reputation || 50) - SG.u.rint(3, 8));
       addHistory(c, out.hist.join('；'));
       return out;
     }
-    /* 3. 兑换（携带现金/物资/硬通货/晶核） */
+    /* 3. 兑换（携带现金/物资/硬通货/晶核）：积分就是顾客的钱，换完就花 */
     if (c.bannedUntil < state.day) {
       var pay = SG.Econ.payMix(state.day);
       var val = SG.Econ.exchange(pay, state);
@@ -196,16 +205,22 @@ SG.Cust = (function () {
       out.exchanged = val;
       out.hist.push('用' + pay.label + '兑换了 ' + SG.u.money(val) + ' 积分');
     }
-    /* 4. 购物（只买货架上的商品） */
+    /* 4. 购物：顾客进门就是买东西的。货架上有他要的类别就买，买不起/没货就走。 */
     var bought = shopFromShelf(c, state);
     if (bought.items.length) {
       c.visits += 1;
       out.spent = bought.spent;
       out.items = bought.items;
       out.hist.push('购买了：' + bought.items.map(function (x) { return x.name + '×' + x.qty; }).join('、'));
-    } else if (out.exchanged > 0) {
+      state.totalBuys = (state.totalBuys || 0) + bought.items.length;
+      /* 成交：60% 概率顾客对外好评，名声+1~3；40% 顾客懒得说，不加 */
+      if (SG.u.chance(0.6)) {
+        var repGain = SG.u.rint(1, 3);
+        state.reputation = Math.min(100, (state.reputation || 50) + repGain);
+      }
+    } else {
       c.visits += 1;
-      out.hist.push('兑换了积分，但货架空空，没买到东西');
+      if (out.exchanged > 0) out.hist.push('换了积分但货架上没有他要的东西，没买成');
     }
     if (out.hist.length) addHistory(c, out.hist.join('；'));
     return out;
@@ -243,17 +258,37 @@ SG.Cust = (function () {
     '饮用水': 'water', '饮料': 'drink', '速食': 'instant', '零食': 'snack',
     '米面粮油': 'grain', '蔬菜': 'veg', '水果': 'fruit', '蛋奶': 'dairy',
     '水产': 'aquatic', '肉类': 'meat', '日用': 'daily', '药品': 'med',
-    '娱乐': 'ent', '衣物': 'cloth', '枪械': 'weapon', '调料厨具': 'spice'
+    '娱乐': 'ent', '衣物': 'cloth', '枪械': 'weapon', '调料厨具': 'spice',
+    '日化': 'hygiene', '纸品': 'paper', '酒水': 'wine', '烘焙': 'bakery',
+    '文具': 'stationery', '厨房用品': 'kitchen', '五金': 'tool',
+    '糖果': 'candy', '咖啡': 'coffee', '茶叶': 'tea',
+    '母婴': 'baby', '宠物': 'pet', '图书': 'book', '生活用品': 'daily'
   };
 
-  /* 顾客购物偏好权重（按商品大类） */
+  /* 顾客购买非必需品的成熟度门槛： */
+  function nonEssTier(state) {
+    var buys = state.totalBuys || 0;
+    var days = state.hotelDays || 0;
+    if (buys >= 1000 || days >= 100) return 2;
+    if (buys >= 500 || days >= 50) return 1;
+    return 0;
+  }
+
+  /* 顾客购物偏好权重（按商品大类）。
+     生存刚需（米面粮油/水/速食）权重最高；零食次之；
+     改善型（饮料/日用/蔬果肉蛋奶）再次；
+     享受型（娱乐/衣物/图书/酒水/咖啡茶）受门槛 tier 压制。 */
   function prefsOf(c, state) {
     var w = {
-      water: 0.15, instant: 0.19, snack: 0.09, drink: 0.09, grain: 0.08,
-      daily: 0.12, med: 0.05, veg: 0.05, fruit: 0.04, meat: 0.04,
-      aquatic: 0.03, dairy: 0.04, ent: 0.01, cloth: 0.00, weapon: 0.00, spice: 0.02, tool: 0.01
+      grain: 0.20, water: 0.16, instant: 0.14, med: 0.05,
+      drink: 0.08, snack: 0.06, daily: 0.07, hygiene: 0.05, paper: 0.04, spice: 0.03,
+      veg: 0.05, fruit: 0.04, meat: 0.04, dairy: 0.04, aquatic: 0.03,
+      baby: 0.02, pet: 0.02,
+      candy: 0.02, coffee: 0.02, tea: 0.02, bakery: 0.02,
+      ent: 0.03, cloth: 0.02, book: 0.02, wine: 0.02,
+      stationery: 0.01, kitchen: 0.01, tool: 0.01, weapon: 0.00
     };
-    if (c.persona === 'rich') { w.grain += 0.05; w.meat += 0.06; w.aquatic += 0.05; w.ent += 0.03; w.drink += 0.03; }
+    if (c.persona === 'rich') { w.grain += 0.04; w.meat += 0.06; w.aquatic += 0.05; w.ent += 0.03; w.drink += 0.03; w.wine += 0.03; }
     if (c.persona === 'sick') { w.med += 0.15; w.water += 0.06; }
     if (c.persona === 'wander') { w.water += 0.08; w.instant += 0.08; w.med += 0.03; }
     if (state.store.areas.ent) w.ent += 0.05;
@@ -262,6 +297,11 @@ SG.Cust = (function () {
     if (state.store.areas.arms) w.weapon += 0.01;
     if (state.store.dlc.shops.cinema) w.ent += 0.04;
     if (state.store.dlc.shops.clothes) w.cloth += 0.04;
+    /* 非必需品门槛压制：tier0 直接清零，tier1 小概率，tier2 正常 */
+    var tier = nonEssTier(state);
+    var nonEss = ['ent', 'cloth', 'book', 'wine', 'stationery', 'kitchen', 'tool', 'coffee', 'tea', 'bakery', 'candy'];
+    var factor = tier === 0 ? 0 : (tier === 1 ? 0.15 : 1);
+    nonEss.forEach(function (k) { w[k] *= factor; });
     return w;
   }
 

@@ -229,12 +229,51 @@ SG.Fac = (function () {
     return out;
   }
 
+  /* 一键上货：把仓库里所有能上架的商品自动摆到合适设施（按商品种类逐个摆，容量够为止）。
+     返回 {placed: pid->qty, skipped: [{pid, qty, reason}]} */
+  function autoShelfUp(state) {
+    var placed = {}, skipped = [];
+    /* 按仓库清单遍历（stockedList 已按 cat 排序） */
+    SG.Inv.stockedList(state).forEach(function (row) {
+      if (row.expired) return;
+      var pid = row.p.id, p = row.p, qty = row.qty;
+      /* 循环往合适设施里塞，直到塞完或没地方 */
+      var left = qty;
+      var guard = 0;
+      while (left > 0.001 && guard < 50) {
+        guard++;
+        var facs = suitableFacs(pid, state);
+        if (!facs.length) {
+          if (!placed[pid]) {
+            var reason = SG.Data.canStock(p, state) ? '没有合适设施或容量已满' : '当前等级不可陈列';
+            skipped.push({ pid: pid, qty: left, reason: reason });
+          }
+          break;
+        }
+        var f = facs[0];
+        var space = facCap(f) - facUsed(f);
+        var sp = sizePoints(p);
+        var maxN = Math.floor(space / sp);
+        if (maxN < 1) break;
+        var put = Math.min(left, maxN);
+        f.items[pid] = (f.items[pid] || 0) + put;
+        state.inventory[pid] -= put;
+        if (state.inventory[pid] <= 0.0001) delete state.inventory[pid];
+        placed[pid] = (placed[pid] || 0) + put;
+        left -= put;
+      }
+    });
+    rebuildShelf(state);
+    var placedCount = 0; for (var k in placed) placedCount += placed[k];
+    return { placed: placed, placedCount: placedCount, kinds: Object.keys(placed).length, skipped: skipped };
+  }
+
   return {
     storOf: storOf, sizeOf: sizeOf, sizePoints: sizePoints, zoneOf: DATA.facility.zoneOf,
     planFor: planFor, buildFor: buildFor, applyPlan: applyPlan, ensure: ensure,
     facilities: facilities, zoneList: zoneList, facById: facById,
     facCap: facCap, facUsed: facUsed, canPlace: canPlace,
     shelfUp: shelfUp, shelfDown: shelfDown, shelfTake: shelfTake, rebuildShelf: rebuildShelf,
-    suitableFacs: suitableFacs, makeOden: makeOden
+    suitableFacs: suitableFacs, makeOden: makeOden, autoShelfUp: autoShelfUp
   };
 })();

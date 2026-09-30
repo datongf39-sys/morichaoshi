@@ -44,7 +44,7 @@ DATA.config = {
     { lv: 1,  name: '小卖部',     area: '30㎡',   cost: 0,
       desc: '两排货架、一台收银台。柜台后是你的住处：一张床、一套基础卫浴。保护罩把荒野挡在门外。',
       cond: { cum: 0, types: 0, newCust: 0, emp: 0, crys: 0 } },
-    { lv: 2,  name: '小超市',     area: '80㎡',   cost: 1500,
+    { lv: 2,  name: '便利店',     area: '80㎡',   cost: 1500,
       desc: '货架多了一排，门头换了新招牌。夜里亮起的日光灯，是方圆几公里唯一的光。',
       cond: { cum: 500, types: 15, newCust: 5, emp: 0, crys: 0 } },
     { lv: 3,  name: '中型超市',   area: '200㎡',  cost: 4200,
