@@ -1,0 +1,53 @@
+/* ============================================================
+   数据 / 商品 / 水产
+   aq01 三文鱼可生食；其余生食会生病
+   ============================================================ */
+window.DATA = window.DATA || {};
+DATA.products = DATA.products || [];
+DATA.products.push(
+  { id: 'aq01', brand: '大洋世家', name: '大洋世家三文鱼刺身 200g', cat: '水产', price: 40.0, sv: 2, fx: { raw: true, rawSafe: true },
+    nut: { carb: 0, prot: 20, fat: 13, vit: 3, water: 60 }, eff: { sat: 24, thirst: 0, hp: 0, ent: 2, hyg: 0 },
+    shelf: 3, lv: 4, kind: 'aquatic' },
+  { id: 'aq02', brand: '鲜美来', name: '鲜美来青虾仁 250g', cat: '水产', price: 25.0, sv: 2, fx: { raw: true },
+    nut: { carb: 0, prot: 18, fat: 1, vit: 1, water: 70 }, eff: { sat: 18, thirst: 0, hp: 0, ent: 0, hyg: 0 },
+    shelf: 5, lv: 4, kind: 'aquatic' },
+  { id: 'aq03', brand: '国联水产', name: '国联水产南美白对虾 400g', cat: '水产', price: 35.0, sv: 4, fx: { raw: true },
+    nut: { carb: 1, prot: 15, fat: 1, vit: 1, water: 70 }, eff: { sat: 17, thirst: 0, hp: 0, ent: 0, hyg: 0 },
+    shelf: 5, lv: 4, kind: 'aquatic' },
+  { id: 'aq04', brand: '獐子岛', name: '獐子岛扇贝 400g', cat: '水产', price: 30.0, sv: 3, fx: { raw: true },
+    nut: { carb: 2, prot: 15, fat: 1.5, vit: 1, water: 70 }, eff: { sat: 16, thirst: 0, hp: 0, ent: 1, hyg: 0 },
+    shelf: 5, lv: 4, kind: 'aquatic' },
+  { id: 'aq05', brand: '好当家', name: '好当家即食海参 250g', cat: '水产', price: 80.0, sv: 3,
+    nut: { carb: 0, prot: 12, fat: 0.5, vit: 1, water: 60 }, eff: { sat: 12, thirst: 0, hp: 3, ent: 1, hyg: 0 },
+    shelf: 90, lv: 5, kind: 'aquatic' },
+  { id: 'aq06', brand: '信良记', name: '信良记麻辣小龙虾 500g', cat: '水产', price: 35.0, sv: 3, fx: { raw: true },
+    nut: { carb: 3, prot: 16, fat: 6, vit: 1, water: 60 }, eff: { sat: 20, thirst: 2, hp: 0, ent: 6, hyg: 0 },
+    shelf: 5, lv: 4, kind: 'aquatic' },
+  { id: 'aq07', brand: '海天下', name: '海天下舟山带鱼段 500g', cat: '水产', price: 20.0, sv: 3, fx: { raw: true },
+    nut: { carb: 0, prot: 17, fat: 5, vit: 2, water: 60 }, eff: { sat: 18, thirst: 0, hp: 0, ent: 0, hyg: 0 },
+    shelf: 7, lv: 4, kind: 'aquatic' },
+  { id: 'aq08', brand: '海天下', name: '海天下鲅鱼 500g', cat: '水产', price: 22.0, sv: 3, fx: { raw: true },
+    nut: { carb: 0, prot: 18, fat: 4, vit: 2, water: 60 }, eff: { sat: 18, thirst: 0, hp: 0, ent: 0, hyg: 0 },
+    shelf: 7, lv: 4, kind: 'aquatic' },
+  { id: 'aq09', brand: '海天下', name: '海天下鱿鱼 400g', cat: '水产', price: 18.0, sv: 3, fx: { raw: true },
+    nut: { carb: 3, prot: 15, fat: 1.5, vit: 1, water: 70 }, eff: { sat: 16, thirst: 0, hp: 0, ent: 0, hyg: 0 },
+    shelf: 6, lv: 4, kind: 'aquatic' },
+  { id: 'aq10', brand: '海天下', name: '海天下乳山生蚝 6只', cat: '水产', price: 25.0, sv: 3, fx: { raw: true, rawSafe: true },
+    nut: { carb: 3, prot: 9, fat: 2, vit: 2, water: 60 }, eff: { sat: 14, thirst: 0, hp: 0, ent: 1, hyg: 0 },
+    shelf: 4, lv: 4, kind: 'aquatic' },
+  { id: 'aq11', brand: '通威', name: '通威鲜活草鱼 1条', cat: '水产', price: 25.0, sv: 5, fx: { raw: true },
+    nut: { carb: 0, prot: 17, fat: 5, vit: 1, water: 70 }, eff: { sat: 20, thirst: 0, hp: 0, ent: 0, hyg: 0 },
+    shelf: 3, lv: 4, kind: 'aquatic' },
+  { id: 'aq12', brand: '通威', name: '通威鲜活鲈鱼 1条', cat: '水产', price: 30.0, sv: 5, fx: { raw: true },
+    nut: { carb: 0, prot: 18, fat: 5, vit: 2, water: 70 }, eff: { sat: 21, thirst: 0, hp: 0, ent: 1, hyg: 0 },
+    shelf: 3, lv: 4, kind: 'aquatic' },
+  { id: 'aq13', brand: '国联水产', name: '国联水产基围虾 500g', cat: '水产', price: 40.0, sv: 5, fx: { raw: true },
+    nut: { carb: 1, prot: 16, fat: 1.5, vit: 1, water: 70 }, eff: { sat: 18, thirst: 0, hp: 0, ent: 0, hyg: 0 },
+    shelf: 4, lv: 4, kind: 'aquatic' },
+  { id: 'aq14', brand: '雄鸡标', name: '雄鸡标金枪鱼罐头 185g', cat: '水产', price: 15.0, sv: 2,
+    nut: { carb: 0, prot: 20, fat: 8, vit: 0, water: 40 }, eff: { sat: 22, thirst: 0, hp: 0, ent: 0, hyg: 0 },
+    shelf: 720, lv: 4, kind: 'aquatic' },
+  { id: 'aq15', brand: '闽洋', name: '闽洋海带结 200g', cat: '水产', price: 8.0, sv: 4,
+    nut: { carb: 4, prot: 2, fat: 0, vit: 3, water: 80 }, eff: { sat: 8, thirst: 0, hp: 0, ent: 0, hyg: 0 },
+    shelf: 180, lv: 4, kind: 'aquatic' }
+);

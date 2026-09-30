@@ -1,0 +1,46 @@
+/* ============================================================
+   数据 / 商品 / 娱乐（玩家使用时不消耗，仅花费时间与体力）
+   ============================================================ */
+window.DATA = window.DATA || {};
+DATA.products = DATA.products || [];
+DATA.products.push(
+  { id: 'en01', brand: '姚记', name: '姚记扑克牌', cat: '娱乐', price: 5.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 14, hyg: 0 },
+    shelf: null, lv: 1, kind: 'ent', durable: true },
+  { id: 'en02', brand: '得力', name: '得力象棋', cat: '娱乐', price: 15.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 18, hyg: 0 },
+    shelf: null, lv: 2, kind: 'ent', durable: true },
+  { id: 'en03', brand: '得力', name: '得力围棋', cat: '娱乐', price: 30.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 20, hyg: 0 },
+    shelf: null, lv: 3, kind: 'ent', durable: true },
+  { id: 'en04', brand: '重庆出版社', name: '《三体》刘慈欣', cat: '娱乐', price: 30.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 24, hyg: 0 },
+    shelf: null, lv: 2, kind: 'ent', durable: true },
+  { id: 'en05', brand: '作家出版社', name: '《活着》余华', cat: '娱乐', price: 25.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 22, hyg: 0 },
+    shelf: null, lv: 1, kind: 'ent', durable: true },
+  { id: 'en06', brand: '人民文学出版社', name: '《红楼梦》', cat: '娱乐', price: 40.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 26, hyg: 0 },
+    shelf: null, lv: 2, kind: 'ent', durable: true },
+  { id: 'en07', brand: '德生', name: '德生收音机', cat: '娱乐', price: 60.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 20, hyg: 0 },
+    shelf: null, lv: 3, kind: 'ent', durable: true },
+  { id: 'en08', brand: '游卡', name: '三国杀标准版', cat: '娱乐', price: 30.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 22, hyg: 0 },
+    shelf: null, lv: 3, kind: 'ent', durable: true },
+  { id: 'en09', brand: '雅马哈', name: '雅马哈民谣吉他', cat: '娱乐', price: 899, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 30, hyg: 0 },
+    shelf: null, lv: 5, kind: 'ent', durable: true },
+  { id: 'en10', brand: '迪卡侬', name: '迪卡侬哑铃 2kg', cat: '娱乐', price: 40.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 3, ent: 12, hyg: 0 },
+    shelf: null, lv: 2, kind: 'ent', durable: true },
+  { id: 'en11', brand: '李宁', name: '李宁跳绳', cat: '娱乐', price: 15.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 2, ent: 10, hyg: 0 },
+    shelf: null, lv: 1, kind: 'ent', durable: true },
+  { id: 'en12', brand: '得力', name: '得力拼图 1000片', cat: '娱乐', price: 20.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 0, ent: 18, hyg: 0 },
+    shelf: null, lv: 2, kind: 'ent', durable: true },
+  { id: 'en13', brand: '斯伯丁', name: '斯伯丁篮球', cat: '娱乐', price: 100.0, sv: 1,
+    nut: { carb: 0, prot: 0, fat: 0, vit: 0, water: 0 }, eff: { sat: 0, thirst: 0, hp: 3, ent: 16, hyg: 0 },
+    shelf: null, lv: 3, kind: 'ent', durable: true }
+);
